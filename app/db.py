@@ -1,16 +1,22 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+from typing import Generator
 import os
 
-DATABASE_URL = "postgresql://postgres:567234@localhost:5438/postgres"
+# URL підключення до бази даних
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:567234@localhost:5438/postgres")
 
-engine = create_engine(DATABASE_URL)
+# Створення двигуна для підключення до бази даних
+engine = create_engine(DATABASE_URL, echo=True)
+
+# Створення локального сеансу для роботи з базою даних
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Базовий клас для оголошення моделей
 Base = declarative_base()
 
-# Dependency
-def get_db():
+# Dependency для отримання сеансу бази даних
+def get_db() -> Generator[SessionLocal, None, None]:
     db = SessionLocal()
     try:
         yield db
